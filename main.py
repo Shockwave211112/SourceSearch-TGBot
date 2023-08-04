@@ -4,9 +4,9 @@ from saucenao_api import SauceNao
 from urllib.parse import urlparse, parse_qs
 from validators import url as urlValidator
 
-bot_id = "s"
+bot_id = "cc"
 bot = telebot.TeleBot(bot_id)
-sauce_api = SauceNao("f")
+sauce_api = SauceNao("fss")
 
 def find(message):
     if message.content_type == 'photo':
