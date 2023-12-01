@@ -4,9 +4,9 @@ from saucenao_api import SauceNao
 from urllib.parse import urlparse, parse_qs
 from validators import url as urlValidator
 
-bot_id = "cc"
+bot_id = "telegram_bot_id"
 bot = telebot.TeleBot(bot_id)
-sauce_api = SauceNao("fss")
+sauce_api = SauceNao("sauce_nao_id")
 
 def find(message):
     if message.content_type == 'photo':
@@ -17,20 +17,18 @@ def find(message):
             markup = types.InlineKeyboardMarkup()
 
             for sauce in results:
-                if sauce.similarity >= 50:
-                        if len(sauce.urls) != 0:
-                            for url in sauce.urls:
-                                name = urlparse(url)
-                                url_tmp = types.InlineKeyboardButton(name.hostname, url = url)
+                if sauce.similarity >= 60:
+                    if len(sauce.urls) != 0:
+                        for url in sauce.urls:
+                            name = urlparse(url)
+                            url_tmp = types.InlineKeyboardButton(name.hostname, url = url)
+                            markup.add(url_tmp)
+                        if 'source' in sauce.raw['data']:
+                            if urlValidator(sauce.raw['data']['source']):
+                                name = urlparse(sauce.raw['data']['source'])
+                                url_tmp = types.InlineKeyboardButton(name.hostname, url = sauce.raw['data']['source'])
                                 markup.add(url_tmp)
-                            if 'source' in sauce.raw['data']:
-                                if urlValidator(sauce.raw['data']['source']):
-                                    name = urlparse(sauce.raw['data']['source'])
-                                    url_tmp = types.InlineKeyboardButton(name.hostname, url = sauce.raw['data']['source'])
-                                    markup.add(url_tmp)
-
             if results[0].similarity >= 50:
-
                 while results[number_of_result].author == None:
                     number_of_result = number_of_result + 1
 
@@ -44,8 +42,7 @@ def find(message):
                 answer = "К сожалению, ничего не найдено.\nМожешь попробовать сам на сайтах \n*saucenao.com | yandex.ru/images/ | images.google.ru*"
                 bot.reply_to(message, answer, parse_mode="Markdown", disable_web_page_preview = True)    
         except Exception as e:
-            bot.send_message(message.chat.id, 'Ой... Что-то пошло не так, попробуйте снова.')
-            print(e)
+            bot.send_message(message.chat.id, 'Ой... Что-то пошло не так, попробуйте снова.\nError: ', e)
     else:
         bot.send_message(message.chat.id, 'Это не картинка...')
 
