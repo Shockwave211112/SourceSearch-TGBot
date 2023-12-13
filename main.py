@@ -28,7 +28,7 @@ def find(message):
                                 name = urlparse(sauce.raw['data']['source'])
                                 url_tmp = types.InlineKeyboardButton(name.hostname, url = sauce.raw['data']['source'])
                                 markup.add(url_tmp)
-            if results[0].similarity >= 50:
+            if results[0].similarity >= 60:
                 while results[number_of_result].author == None:
                     number_of_result = number_of_result + 1
 
