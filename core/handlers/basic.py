@@ -7,7 +7,6 @@ from saucenao_api.errors import *
 from core.settings import settings
 from urllib.parse import urlparse
 from validators import url as urlValidator
-import time
 
 uselessHosts = ['i.pximg.net']
 async def get_start(message: Message, bot: Bot):
@@ -23,7 +22,7 @@ async def get_photo(message: Message, bot: Bot):
             
             if results[0].similarity < 60:
                 answer = "К сожалению, ничего не найдено.\nМожешь попробовать сам на сайтах \n<b>saucenao.com | yandex.ru/images/ | images.google.ru</b>"
-                await message.reply(answer, parse_mode=ParseMode.HTML)
+                await message.reply(answer, parse_mode=ParseMode.HTML, disable_web_page_preview = True)
                 return
             
             linksMarkup = InlineKeyboardBuilder()
