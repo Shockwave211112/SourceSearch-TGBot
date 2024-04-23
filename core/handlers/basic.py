@@ -105,7 +105,7 @@ async def ascii2d_choosen(message: Message, bot: Bot, state: FSMContext):
    
 @router.message(Ascii2dQuestion.wait_ascii2d, F.chat.type == "private")     
 async def wrong_answer(message: Message, bot: Bot, state: FSMContext):
-    await message.answer(f'Такие сообщения я не понимаю.\nВыберите вариант ответа из списка ниже.', reply_markup=keyboard, resize_keyboard=True)
+    await message.answer(f'Такие сообщения я не понимаю.\nВыберите вариант ответа из списка ниже.', reply_markup=yes_no_keyboard, resize_keyboard=True)
 
 @router.message(F.chat.type == "private")         
 async def get_anything(message: Message, bot: Bot):
