@@ -1,8 +1,6 @@
-from aiogram import Bot, Dispatcher, F
-
-from core.handlers.basic import get_start, get_photo, get_anything, get_group_message
+from aiogram import Bot, Dispatcher
+from core.handlers import basic
 from core.settings import settings
-
 import asyncio
 
 async def start():
@@ -10,10 +8,8 @@ async def start():
 
     dp = Dispatcher()
     
-    dp.message.register(get_start, F.text == "/start", F.chat.type == "private")
-    dp.message.register(get_group_message, F.photo, F.chat.type == ["group"])
-    dp.message.register(get_photo, F.photo, F.chat.type == "private")
-    dp.message.register(get_anything, F.chat.type == "private")
+    dp.include_router(basic.router)
+
     try:
         await dp.start_polling(bot)
     finally:

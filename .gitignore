@@ -2,4 +2,3 @@ creds
 __pycache__/main.cpython-311.pyc
 core/__pycache__/settings.cpython-311.pyc
 core/handlers/__pycache__/basic.cpython-311.pyc
-creds

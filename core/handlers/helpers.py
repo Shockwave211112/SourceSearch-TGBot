@@ -29,7 +29,7 @@ def difference_images(img1, img2):
     image2Hash = average_hash(Image.open(BytesIO(img2)))
     
     difference = image1Hash - image2Hash
-    if difference == 0:
+    if difference <= 5:
         return False
     else:
         return True
