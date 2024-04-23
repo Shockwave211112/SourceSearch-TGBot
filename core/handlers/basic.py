@@ -1,22 +1,15 @@
 from aiogram import Bot, F, Router
-from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove
+from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.enums import ParseMode
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from core.settings import settings
-from core.handlers.helpers import button_parser
+from core.handlers.helpers import button_parser, yes_no_keyboard, Ascii2dQuestion
 from core.handlers.searches import ascii2d_handler, saucenao_handler
 
 from aiogram.fsm.context import FSMContext
-from aiogram.fsm.state import StatesGroup, State
 
 router = Router()
 
-class Ascii2dQuestion(StatesGroup):
-    wait_ascii2d = State()
-
-yes_no_keyboard = ReplyKeyboardMarkup(keyboard=[
-        [KeyboardButton(text="Да"), KeyboardButton(text="Нет")]
-], resize_keyboard=True)
 
 @router.message(F.text == "/start", F.chat.type == "private")
 async def get_start(message: Message, bot: Bot):
@@ -30,8 +23,7 @@ async def get_photo(message: Message, bot: Bot, state: FSMContext):
     attachedUrls = []
     linksMarkup = InlineKeyboardBuilder()
     
-    # sauceNao = await saucenao_handler(fileUrl)
-    sauceNao = 0
+    sauceNao = await saucenao_handler(fileUrl)
     if sauceNao:
         button_parser(sauceNao, linksMarkup, attachedUrls)
         for item in sauceNao:

@@ -4,6 +4,9 @@ from urllib.parse import urlparse
 from imagehash import average_hash
 from io import BytesIO
 from PIL import Image
+from aiogram.fsm.state import StatesGroup, State
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
+from aiogram.fsm.context import FSMContext
 
 uselessHosts = ['i.pximg.net']
 
@@ -33,3 +36,14 @@ def difference_images(img1, img2):
         return False
     else:
         return True
+
+class Ascii2dQuestion(StatesGroup):
+    wait_ascii2d = State()
+
+yes_no_keyboard = ReplyKeyboardMarkup(keyboard=[
+        [KeyboardButton(text="Да"), KeyboardButton(text="Нет")]
+], resize_keyboard=True)
+
+async def clear_cache(state: FSMContext):
+    await state.set_state(None)
+    await state.update_data(message_for_answer = '', file_url = '')
