@@ -1,12 +1,10 @@
 from aiogram.utils.keyboard import InlineKeyboardBuilder
-from aiogram.types import InlineKeyboardButton
+from aiogram.filters.callback_data import CallbackData
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from urllib.parse import urlparse
 from imagehash import average_hash
 from io import BytesIO
 from PIL import Image
-from aiogram.fsm.state import StatesGroup, State
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
-from aiogram.fsm.context import FSMContext
 
 uselessHosts = ['i.pximg.net']
 
@@ -18,6 +16,10 @@ class PictureItem:
         
     def __str__(self):
         return f'Title={self.title}\nAuthor={self.author}\nURL={self.url}'
+    
+class Ascii2dCallbackData(CallbackData, prefix="fileData"):
+    action: str
+    file_path: str
 
 def button_parser(picturesList: list, keyboard: InlineKeyboardBuilder, attachedUrls: list):
     for item in picturesList:
@@ -32,18 +34,15 @@ def difference_images(img1, img2):
     image2Hash = average_hash(Image.open(BytesIO(img2)))
     
     difference = image1Hash - image2Hash
-    if difference <= 5:
+    if difference < 3:
         return False
     else:
         return True
-
-class Ascii2dQuestion(StatesGroup):
-    wait_ascii2d = State()
-
-yes_no_keyboard = ReplyKeyboardMarkup(keyboard=[
-        [KeyboardButton(text="Да"), KeyboardButton(text="Нет")]
-], resize_keyboard=True)
-
-async def clear_cache(state: FSMContext):
-    await state.set_state(None)
-    await state.update_data(message_for_answer = '', file_url = '')
+    
+def ascii2d_keyboard(file_path: str):
+    return InlineKeyboardMarkup(inline_keyboard=[
+    [
+        InlineKeyboardButton(text="Да", callback_data=Ascii2dCallbackData(action='start_ascii2d_search', file_path=file_path).pack()), 
+        InlineKeyboardButton(text="Нет", callback_data=Ascii2dCallbackData(action='cancel_ascii2d_search', file_path=file_path).pack())
+    ]
+])

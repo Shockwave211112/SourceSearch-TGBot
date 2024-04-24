@@ -4,6 +4,7 @@ from saucenao_api import AIOSauceNao
 from core.settings import settings
 from saucenao_api.errors import *
 from bs4 import BeautifulSoup
+from io import BytesIO
 import re, requests
 
 async def ascii2d_handler(photo_url: str):
@@ -25,7 +26,7 @@ async def ascii2d_handler(photo_url: str):
         files = {
             "file": 
             (
-                "temp.jpg", photo_file.content, "image/png"
+                "temp.jpg", photo_file.content, "image/jpg"
             )
         }
         url = "https://ascii2d.net/search/multi"
@@ -57,7 +58,8 @@ async def saucenao_handler(photo_url: str):
     async with AIOSauceNao(settings.tokens.sauce_token) as aio:
         try:
             saucenaoResults = []
-            results = await aio.from_url(photo_url)
+            photo_file = requests.get(photo_url)
+            results = await aio.from_file(BytesIO(photo_file.content))
             attachedUrls = []
             
             if results[0].similarity < 60:
