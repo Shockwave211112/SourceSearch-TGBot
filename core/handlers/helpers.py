@@ -21,7 +21,7 @@ class Ascii2dCallbackData(CallbackData, prefix="fileData"):
     action: str
     file_path: str
 
-def button_parser(picturesList: list, keyboard: InlineKeyboardBuilder, attachedUrls: list):
+async def button_parser(picturesList: list, keyboard: InlineKeyboardBuilder, attachedUrls: list):
     for item in picturesList:
         parsedUrl = urlparse(item.url)
         if parsedUrl.hostname not in uselessHosts:
@@ -29,7 +29,7 @@ def button_parser(picturesList: list, keyboard: InlineKeyboardBuilder, attachedU
             urlButton = InlineKeyboardButton(text=parsedUrl.hostname, url = item.url)
             keyboard.row(urlButton)
         
-def difference_images(img1, img2):
+async def difference_images(img1, img2):
     image1Hash = average_hash(Image.open(BytesIO(img1)))
     image2Hash = average_hash(Image.open(BytesIO(img2)))
     

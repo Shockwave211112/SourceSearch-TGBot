@@ -1,5 +1,5 @@
 from aiogram import Bot, Dispatcher
-from core.handlers import basic
+from core.handlers import main
 from core.settings import settings
 import asyncio
 
@@ -8,7 +8,7 @@ async def start():
 
     dp = Dispatcher()
     
-    dp.include_router(basic.router)
+    dp.include_router(main.router)
 
     try:
         await dp.start_polling(bot)
