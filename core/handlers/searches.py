@@ -62,11 +62,11 @@ async def saucenao_handler(photo_url: str):
             results = await aio.from_file(BytesIO(photo_file.content))
             attachedUrls = []
             
-            if results[0].similarity < 60:
+            if results[0].similarity < 65:
                 return False
             
             for item in results:
-                if item.similarity >= 60:
+                if item.similarity >= 65:
                     if item.urls:
                         for url in item.urls:
                             if url not in attachedUrls:

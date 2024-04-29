@@ -28,6 +28,8 @@ async def get_photo(message: Message, bot: Bot):
                 title = item.title
                 author = item.author
                 break
+            else:
+                title, author = 'Unknown', 'Unknown'
         
         answer = "<b>Название: </b>" + title + "\n<b>Автор: </b>" + author + "\n"
         answer += "\n<i>Если нету того, что нужно, попробуй вручную:</i>\n<b>saucenao.com | ascii2d.net | images.google.ru | yandex.ru/images/</b>"
@@ -58,6 +60,8 @@ async def ascii2d_search(callback: CallbackQuery, callback_data: Ascii2dCallback
                 title = item.title
                 author = item.author
                 break
+            else:
+                title, author = 'Unknown', 'Unknown'
         
         answer = "<b>Название: </b>" + title + "\n<b>Автор: </b>" + author + "\n"
         answer += "\n<i>Если нету того, что нужно, попробуй вручную:</i>\n<b>saucenao.com | ascii2d.net | images.google.ru | yandex.ru/images/</b>"
