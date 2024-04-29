@@ -50,7 +50,7 @@ async def ascii2d_handler(photo_url: str):
             }
             async with session.get(url, headers=requestHeader) as response:
                 html = await response.text()
-            authenticityToken =     re.findall("<input type=\"hidden\" name=\"authenticity_token\" value=\"(.*?)\" />", html, re.S)[0]
+            authenticityToken = re.findall("<input type=\"hidden\" name=\"authenticity_token\" value=\"(.*?)\" />", html, re.S)[0]
             payloadData = FormData()
             payloadData.add_field('utf8', '✓')
             payloadData.add_field('authenticity_token', authenticityToken)
@@ -89,30 +89,32 @@ async def ascii2d_handler(photo_url: str):
             return False
     
 async def saucenao_handler(photo_url: str):
-    async with AIOSauceNao(settings.tokens.sauce_token) as aio:
-        try:
-            saucenaoResults = []
-            photo_file = requests.get(photo_url)
-            results = await aio.from_file(BytesIO(photo_file.content))
-            attachedUrls = []
-            
-            if results[0].similarity < 65:
-                return False
-            
-            for item in results:
-                if item.similarity >= 65:
-                    if item.urls:
-                        for url in item.urls:
-                            if url not in attachedUrls:
-                                attachedUrls.append(url)
-                                saucenaoResults.append(PictureItem(item.title, item.author, url))
-                    if 'source' in item.raw['data']:
-                        if urlValidator(item.raw['data']['source']):
-                            if item.raw['data']['source'] not in attachedUrls:
-                                attachedUrls.append(item.raw['data']['source'])
-                                saucenaoResults.append(PictureItem(item.title, item.author, item.raw['data']['source']))
-                            
-            return saucenaoResults
-        except Exception as e:
-            print(f'Error via SauceNao search - {e}')
-            return False    
+    async with ClientSession() as session:
+        async with AIOSauceNao(settings.tokens.sauce_token) as aio:
+            try:
+                saucenaoResults = []
+                async with session.get(photo_url) as response:
+                    photo_file = await response.content.read()
+                results = await aio.from_file(BytesIO(photo_file))
+                attachedUrls = []
+                
+                if results[0].similarity < 65:
+                    return False
+                
+                for item in results:
+                    if item.similarity >= 65:
+                        if item.urls:
+                            for url in item.urls:
+                                if url not in attachedUrls:
+                                    attachedUrls.append(url)
+                                    saucenaoResults.append(PictureItem(item.title, item.author, url))
+                        if 'source' in item.raw['data']:
+                            if urlValidator(item.raw['data']['source']):
+                                if item.raw['data']['source'] not in attachedUrls:
+                                    attachedUrls.append(item.raw['data']['source'])
+                                    saucenaoResults.append(PictureItem(item.title, item.author, item.raw['data']['source']))
+                                
+                return saucenaoResults
+            except Exception as e:
+                print(f'Error via SauceNao search - {e}')
+                return False    

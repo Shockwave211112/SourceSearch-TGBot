@@ -26,8 +26,7 @@ async def button_parser(picturesList: list, keyboard: InlineKeyboardBuilder, att
         parsedUrl = urlparse(item.url)
         if parsedUrl.hostname not in uselessHosts:
             attachedUrls.append(item.url)
-            urlButton = InlineKeyboardButton(text=parsedUrl.hostname, url = item.url)
-            keyboard.row(urlButton)
+            keyboard.row(InlineKeyboardButton(text=parsedUrl.hostname, url = item.url))
         
 async def difference_images(img1, img2):
     image1Hash = average_hash(Image.open(BytesIO(img1)))
