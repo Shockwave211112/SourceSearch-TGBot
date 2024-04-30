@@ -2,8 +2,10 @@ from aiogram import Bot, Dispatcher
 from core.handlers import main
 from core.settings import settings
 import asyncio
+import logging
 
 async def start():
+    logging.basicConfig(level=logging.INFO)
     bot = Bot(token=settings.tokens.bot_token)
 
     dp = Dispatcher()
