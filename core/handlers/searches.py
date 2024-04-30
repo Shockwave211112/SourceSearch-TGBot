@@ -1,15 +1,13 @@
 from core.handlers.helpers import difference_images, PictureItem
 from aiogram.utils.keyboard import InlineKeyboardBuilder
-from aiohttp import ClientSession, FormData
+from aiohttp import ClientSession
 from validators import url as urlValidator
 from saucenao_api import AIOSauceNao 
 from core.settings import settings
-from core.handlers.helpers import button_parser
+from core.handlers.helpers import button_parser, dataPattern, requestHeader
 from saucenao_api.errors import *
 from bs4 import BeautifulSoup
 from io import BytesIO
-import re
-
 
 async def main_search(website: str, photo_url: str):
     fileUrl = "https://api.telegram.org/file/bot" + settings.tokens.bot_token + "/" + photo_url
@@ -44,20 +42,9 @@ async def ascii2d_handler(photo_url: str):
     async with ClientSession() as session:
         try:
             ascii2dResults = []
-            url = "https://ascii2d.net/"
-            requestHeader = {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 YaBrowser/24.1.0.0 Safari/537.36',
-            }
-            async with session.get(url, headers=requestHeader) as response:
-                html = await response.text()
-            authenticityToken = re.findall("<input type=\"hidden\" name=\"authenticity_token\" value=\"(.*?)\" />", html, re.S)[0]
-            payloadData = FormData()
-            payloadData.add_field('utf8', '✓')
-            payloadData.add_field('authenticity_token', authenticityToken)
-
+            payloadData = dataPattern
             async with session.get(photo_url) as response:
                 photo_file = await response.content.read()
-
             payloadData.add_field('file', photo_file, content_type='image/jpg', filename='temp.jpg')
 
             url = "https://ascii2d.net/search/multi"
