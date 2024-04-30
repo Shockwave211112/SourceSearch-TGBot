@@ -1,17 +1,18 @@
 from core.handlers.helpers import difference_images, PictureItem
 from aiogram.utils.keyboard import InlineKeyboardBuilder
-from aiohttp import ClientSession
+from aiohttp import ClientSession, FormData
 from validators import url as urlValidator
-from saucenao_api import AIOSauceNao 
+from saucenao_api import AIOSauceNao
 from core.settings import settings
-from core.handlers.helpers import button_parser, dataPattern, requestHeader
+from core.handlers.helpers import button_parser
 from saucenao_api.errors import *
 from bs4 import BeautifulSoup
 from io import BytesIO
+import re
 
-async def main_search(website: str, photo_url: str):
+async def main_search(website: str, photo_url: str, attached_urls: list = []):
     fileUrl = "https://api.telegram.org/file/bot" + settings.tokens.bot_token + "/" + photo_url
-    attachedUrls = []
+    attachedUrls = attached_urls
     linksKeyboard = InlineKeyboardBuilder()
     match website:
         case 'saucenao':
@@ -42,9 +43,20 @@ async def ascii2d_handler(photo_url: str):
     async with ClientSession() as session:
         try:
             ascii2dResults = []
-            payloadData = dataPattern
+            url = "https://ascii2d.net/"
+            requestHeader = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 YaBrowser/24.1.0.0 Safari/537.36',
+            }
+            async with session.get(url, headers=requestHeader) as response:
+                html = await response.text()
+            authenticityToken = re.findall("<input type=\"hidden\" name=\"authenticity_token\" value=\"(.*?)\" />", html, re.S)[0]
+            payloadData = FormData()
+            payloadData.add_field('utf8', '✓')
+            payloadData.add_field('authenticity_token', authenticityToken)
+
             async with session.get(photo_url) as response:
                 photo_file = await response.content.read()
+
             payloadData.add_field('file', photo_file, content_type='image/jpg', filename='temp.jpg')
 
             url = "https://ascii2d.net/search/multi"
@@ -59,7 +71,10 @@ async def ascii2d_handler(photo_url: str):
                 sourceLinks = sourceDiv[0].find_all('a')
                 title = sourceLinks[0].get_text()
                 source = sourceLinks[0]["href"]
-                author = sourceLinks[1].get_text()
+                if len(sourceLinks) > 1:
+                    author = sourceLinks[1].get_text()
+                else:
+                    author = 'Unknown'
                 img = 'https://ascii2d.net' + item.find_all('img')[0]['src']
 
                 async with session.get(img) as response:
@@ -102,6 +117,6 @@ async def saucenao_handler(photo_url: str):
                                     saucenaoResults.append(PictureItem(item.title, item.author, item.raw['data']['source']))
                                 
                 return saucenaoResults
-            except Exception as e:
+            except SauceNaoApiError as e:
                 print(f'Error via SauceNao search - {e}')
                 return False    
