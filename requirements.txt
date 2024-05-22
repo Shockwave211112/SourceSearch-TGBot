@@ -2,4 +2,6 @@ aiogram==3.4.1
 saucenao-api==2.4.0
 validators
 environs
-BeautifulSoup4
+beautifulsoup4
+PIL
+imagehash
