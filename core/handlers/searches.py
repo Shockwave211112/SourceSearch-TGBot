@@ -27,9 +27,9 @@ async def main_search(website: str, photo_url: str, attached_urls: list = []):
             if 'title' in locals() and 'author' in locals():
                 break
             if item.title != '':
-                title = item.title
+                title = item.title.replace('&', '&amp').replace('<', '&lt').replace('>', '&gt')
             if item.author != '':
-                author = item.author
+                author = item.author.replace('&', '&amp').replace('<', '&lt').replace('>', '&gt')
         if 'title' not in locals():
             title = 'Unknown'
         if 'author' not in locals():
