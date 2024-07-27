@@ -14,11 +14,10 @@ async def main_search(website: str, photo_url: str, attached_urls: list = []):
     fileUrl = "https://api.telegram.org/file/bot" + settings.tokens.bot_token + "/" + photo_url
     attachedUrls = attached_urls
     linksKeyboard = InlineKeyboardBuilder()
-    match website:
-        case 'saucenao':
-            searchResults = await saucenao_handler(fileUrl)
-        case 'ascii2d':
-            searchResults = await ascii2d_handler(fileUrl)
+    if website == 'saucenao':
+    	searchResults = await saucenao_handler(fileUrl)
+    if website == 'ascii2d':
+        searchResults = await ascii2d_handler(fileUrl)
 
     if searchResults:
         await button_parser(searchResults, linksKeyboard, attachedUrls)

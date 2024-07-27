@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  telegram_bot:
+    build: .
+    container_name: telegram_bot_container
+    restart: always
+    volumes:
+      - .:/app
+
