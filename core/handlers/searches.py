@@ -1,5 +1,6 @@
 from core.handlers.helpers import difference_images, PictureItem
 from aiogram.utils.keyboard import InlineKeyboardBuilder
+from concurrent.futures import ThreadPoolExecutor
 from aiohttp import ClientSession, FormData
 from validators import url as urlValidator
 from saucenao_api import AIOSauceNao
@@ -8,8 +9,9 @@ from core.handlers.helpers import button_parser
 from saucenao_api.errors import *
 from bs4 import BeautifulSoup
 from io import BytesIO
-import re
 import cfscrape
+import asyncio
+import re
 
 async def main_search(website: str, photo_url: str, attached_urls: list = []):
     fileUrl = "https://api.telegram.org/file/bot" + settings.tokens.bot_token + "/" + photo_url
@@ -38,8 +40,14 @@ async def main_search(website: str, photo_url: str, attached_urls: list = []):
         return linksKeyboard, title, author
     else:
         return False, '404', '404'
+    
+async def run_blocking_io_in_thread(executor, func, *args, **kwargs):
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(executor, lambda: func(*args, **kwargs))
 
 async def ascii2d_handler(photo_url: str):
+    executor = ThreadPoolExecutor(max_workers=5)
+    
     async with ClientSession() as session:
         try:
             ascii2dResults = []
@@ -47,23 +55,34 @@ async def ascii2d_handler(photo_url: str):
             requestHeader = {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 YaBrowser/24.1.0.0 Safari/537.36',
             }
-            scraper = cloudscraper.create_scraper()
-            response = scraper.get(url).content.decode('UTF-8')
-            authenticityToken = re.findall("<input type=\"hidden\" name=\"authenticity_token\" value=\"(.*?)\" />", response, re.S)[0]
+            scraper = cfscrape.create_scraper()
+
+            response = await run_blocking_io_in_thread(executor, scraper.get, url)
+            response_content = response.content.decode('UTF-8')
+            authenticityToken = re.findall(
+                r"<input type=\"hidden\" name=\"authenticity_token\" value=\"(.*?)\" />",
+                response_content, re.S
+            )[0]
+
             async with session.get(photo_url) as response:
                 photo_file = await response.content.read()
 
             payloadData = {
                 'utf8': '✓',
                 'authenticity_token': authenticityToken
-                }
+            }
             files = {
                 'file': ('file.jpg', photo_file, 'image/jpg')
             }
 
-            url = "https://ascii2d.net/search/multi"
-            resultResponse = scraper.post(url, data=payloadData, files=files).content.decode('UTF-8')
-            soup = BeautifulSoup(resultResponse, 'html.parser')
+            resultResponse = await run_blocking_io_in_thread(
+                executor, scraper.post, "https://ascii2d.net/search/multi", 
+                data=payloadData, files=files
+            )
+            result_content = resultResponse.content.decode('UTF-8')
+            
+            soup = await run_blocking_io_in_thread(executor, BeautifulSoup, result_content, 'html.parser')
+
             for item in soup.find_all('div', attrs={'class': 'row item-box'})[:5]: 
                 sourceDiv = item.find_all('div', attrs={'class': 'detail-box gray-link'})
                 if sourceDiv[0].text in ['', '\n']:
@@ -77,10 +96,11 @@ async def ascii2d_handler(photo_url: str):
                     author = 'Unknown'
                 img = 'https://ascii2d.net' + item.find_all('img')[0]['src']
 
-                with scraper.get(img) as response:
-                    img = response.content
-                    if await difference_images(photo_file, img) == False:
-                        ascii2dResults.append(PictureItem(title, author, source))
+                img_response = await run_blocking_io_in_thread(executor, scraper.get, img)
+                img_content = img_response.content
+
+                if await difference_images(photo_file, img_content) == False:
+                    ascii2dResults.append(PictureItem(title, author, source))
             
             if not ascii2dResults:
                 return False
@@ -89,7 +109,7 @@ async def ascii2d_handler(photo_url: str):
         except Exception as e:
             print(f'Error via ASCII2D search - {e}')
             return False
-    
+
 async def saucenao_handler(photo_url: str):
     async with ClientSession() as session:
         async with AIOSauceNao(settings.tokens.sauce_token) as aio:
