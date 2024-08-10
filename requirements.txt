@@ -5,3 +5,4 @@ environs
 beautifulsoup4
 PIL
 imagehash
+cfscrape

@@ -12,6 +12,7 @@ RUN pip install environs
 RUN pip install beautifulsoup4
 RUN pip install Pillow
 RUN pip install imagehash
+RUN pip install cfscrape
 
 # Копируем все файлы проекта в контейнер
 COPY . .

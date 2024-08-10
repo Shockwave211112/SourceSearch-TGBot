@@ -50,12 +50,9 @@ async def ascii2d_handler(photo_url: str):
     
     async with ClientSession() as session:
         try:
+            scraper = cfscrape.create_scraper()
             ascii2dResults = []
             url = "https://ascii2d.net/"
-            requestHeader = {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 YaBrowser/24.1.0.0 Safari/537.36',
-            }
-            scraper = cfscrape.create_scraper()
 
             response = await run_blocking_io_in_thread(executor, scraper.get, url)
             response_content = response.content.decode('UTF-8')
