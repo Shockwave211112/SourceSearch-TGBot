@@ -9,13 +9,14 @@ from saucenao_api.errors import *
 from bs4 import BeautifulSoup
 from io import BytesIO
 import re
+import cfscrape
 
 async def main_search(website: str, photo_url: str, attached_urls: list = []):
     fileUrl = "https://api.telegram.org/file/bot" + settings.tokens.bot_token + "/" + photo_url
     attachedUrls = attached_urls
     linksKeyboard = InlineKeyboardBuilder()
     if website == 'saucenao':
-    	searchResults = await saucenao_handler(fileUrl)
+        searchResults = await saucenao_handler(fileUrl)
     if website == 'ascii2d':
         searchResults = await ascii2d_handler(fileUrl)
 
@@ -46,23 +47,23 @@ async def ascii2d_handler(photo_url: str):
             requestHeader = {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 YaBrowser/24.1.0.0 Safari/537.36',
             }
-            async with session.get(url, headers=requestHeader) as response:
-                html = await response.text()
-            authenticityToken = re.findall("<input type=\"hidden\" name=\"authenticity_token\" value=\"(.*?)\" />", html, re.S)[0]
-            payloadData = FormData()
-            payloadData.add_field('utf8', '✓')
-            payloadData.add_field('authenticity_token', authenticityToken)
-
+            scraper = cloudscraper.create_scraper()
+            response = scraper.get(url).content.decode('UTF-8')
+            authenticityToken = re.findall("<input type=\"hidden\" name=\"authenticity_token\" value=\"(.*?)\" />", response, re.S)[0]
             async with session.get(photo_url) as response:
                 photo_file = await response.content.read()
 
-            payloadData.add_field('file', photo_file, content_type='image/jpg', filename='temp.jpg')
+            payloadData = {
+                'utf8': '✓',
+                'authenticity_token': authenticityToken
+                }
+            files = {
+                'file': ('file.jpg', photo_file, 'image/jpg')
+            }
 
             url = "https://ascii2d.net/search/multi"
-            async with session.post(url, headers=requestHeader, data=payloadData) as response:
-                html = await response.text()
-
-            soup = BeautifulSoup(html, 'html.parser')
+            resultResponse = scraper.post(url, data=payloadData, files=files).content.decode('UTF-8')
+            soup = BeautifulSoup(resultResponse, 'html.parser')
             for item in soup.find_all('div', attrs={'class': 'row item-box'})[:5]: 
                 sourceDiv = item.find_all('div', attrs={'class': 'detail-box gray-link'})
                 if sourceDiv[0].text in ['', '\n']:
@@ -76,8 +77,8 @@ async def ascii2d_handler(photo_url: str):
                     author = 'Unknown'
                 img = 'https://ascii2d.net' + item.find_all('img')[0]['src']
 
-                async with session.get(img) as response:
-                    img = await response.content.read()
+                with scraper.get(img) as response:
+                    img = response.content
                     if await difference_images(photo_file, img) == False:
                         ascii2dResults.append(PictureItem(title, author, source))
             
