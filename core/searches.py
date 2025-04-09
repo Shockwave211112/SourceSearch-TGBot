@@ -92,9 +92,9 @@ async def ascii2d_handler(photo_url: str):
         for item in apiResults:
             if item.url and urlValidator(item.url):
                 if item.url not in attachedUrls:
-                    item_bytes = await fetch_img_bytes(item.url)
+                    item_bytes = await fetch_img_bytes(item.thumbnail)
                     similarity = await get_similarity(photo_bytes, item_bytes)
-                    if similarity >= 65:
+                    if similarity >= 90:
                         attachedUrls.append(item.url)
                         results.append(PictureItem(item.title, item.author, item.url))
 
