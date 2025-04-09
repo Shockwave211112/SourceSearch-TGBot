@@ -10,14 +10,13 @@ from imagehash import average_hash
 from PIL import Image
 from io import BytesIO
 
-uselessHosts = ['i.pximg.net']
+useless_hosts = ['i.pximg.net', 'pbs.twimg.com', 'twimg.com']
 
 class PictureItem:
     def __init__(self, title = '', author = '', url = ''):
         self.title = title
         self.author = author
         self.url = url
-        
     def __str__(self):
         return f'Title={self.title}\nAuthor={self.author}\nURL={self.url}'
     
@@ -28,7 +27,7 @@ class SearchCallbackData(CallbackData, prefix="fileData"):
 async def button_parser(picturesList: list, keyboard: InlineKeyboardBuilder, attachedUrls: list):
     for item in picturesList:
         parsedUrl = urlparse(item.url)
-        if parsedUrl.hostname not in uselessHosts:
+        if parsedUrl.hostname not in useless_hosts and item.url not in attachedUrls:
             attachedUrls.append(item.url)
             keyboard.row(InlineKeyboardButton(text=parsedUrl.hostname, url = item.url))
     
