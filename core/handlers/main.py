@@ -27,6 +27,7 @@ async def get_photo(message: Message, bot: Bot):
         ))
         await message.reply(answer, 
             reply_markup=search_results_keyboard.as_markup(), 
+            reply_markup=search_results_keyboard.as_markup(), 
             parse_mode=ParseMode.HTML,
             disable_web_page_preview = True)
     else:
@@ -42,11 +43,13 @@ async def ascii2d_search(callback: CallbackQuery, callback_data: SearchCallbackD
         disable_web_page_preview = True)
     
     search_results_keyboard, title, author = await main_search('ascii2d', callback_data.file_path)
+    search_results_keyboard, title, author = await main_search('ascii2d', callback_data.file_path)
 
     if search_results_keyboard:
         answer = TITLE + title + "\n" + AUTHOR + author + "\n"
         
         await callback.message.edit_text(answer,
+            reply_markup=search_results_keyboard.as_markup(), 
             reply_markup=search_results_keyboard.as_markup(), 
             parse_mode=ParseMode.HTML,
             disable_web_page_preview = True)
@@ -72,6 +75,19 @@ async def additional_search(callback: CallbackQuery, callback_data: SearchCallba
     await callback.message.edit_reply_markup(reply_markup=callback.message.reply_markup)
     
     callback.message.reply_markup.inline_keyboard.pop()
+    attached_kb = callback.message.reply_markup.inline_keyboard
+    for button in attached_kb:
+        attached_urls.append(button[0].url)
+    
+    search_results_keyboard, title, author = await main_search('ascii2d', callback_data.file_path, attached_urls=attached_urls)
+    if search_results_keyboard:    
+        new_kb = InlineKeyboardBuilder()
+        for button in attached_kb:
+            new_kb.row(InlineKeyboardButton(text=button[0].text, url=button[0].url))
+        for button in search_results_keyboard.as_markup().inline_keyboard:
+            new_kb.row(InlineKeyboardButton(text=button[0].text, url=button[0].url))
+            
+        await callback.message.edit_reply_markup(reply_markup=new_kb.as_markup())
     attached_kb = callback.message.reply_markup.inline_keyboard
     for button in attached_kb:
         attached_urls.append(button[0].url)
