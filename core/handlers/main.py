@@ -1,8 +1,8 @@
 from aiogram import Bot, F, Router
 from aiogram.types import Message, CallbackQuery, InlineKeyboardButton
 from aiogram.enums import ParseMode
-from core.handlers.helpers import SearchCallbackData, ascii2d_keyboard
-from core.handlers.searches import main_search
+from core.helpers import SearchCallbackData, ascii2d_keyboard
+from core.searches import main_search
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 router = Router()
@@ -16,7 +16,7 @@ async def get_photo(message: Message, bot: Bot):
     file = await bot.get_file(message.photo[-1].file_id)
     searchResultsKeyboard, title, author = await main_search('saucenao', file.file_path)
     if searchResultsKeyboard:
-        answer = "<b>Название: </b>" + title + "\n<b>Автор: </b>" + author + "\n"
+        answer = "<b>Фандом/Название: </b>" + title + "\n<b>Автор: </b>" + author + "\n"
         
         searchResultsKeyboard.row(InlineKeyboardButton(
             text='# Поискать в ASCII2D', 
