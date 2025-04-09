@@ -10,19 +10,18 @@ from validators import url as urlValidator
 from PicImageSearch import SauceNAO, Ascii2D
 
 async def main_search(website: str, photo_url: str, attached_urls: list = []):
-    fileUrl = "https://api.telegram.org/file/bot" + settings.tokens.bot_token + "/" + photo_url
-    attachedUrls = attached_urls
-    linksKeyboard = InlineKeyboardBuilder() # Клавиатура с результатами
+    file_url = "https://api.telegram.org/file/bot" + settings.tokens.bot_token + "/" + photo_url
+    links_keyboard = InlineKeyboardBuilder() # Клавиатура с результатами
     
     if website == 'saucenao':
-        searchResults = await saucenao_handler(fileUrl)
+        search_results = await saucenao_handler(file_url)
     if website == 'ascii2d':
-        searchResults = await ascii2d_handler(fileUrl)
+        search_results = await ascii2d_handler(file_url)
             
-    if searchResults:
-        await button_parser(searchResults, linksKeyboard, attachedUrls)
+    if search_results:
+        await button_parser(search_results, links_keyboard, attached_urls)
 
-        for item in searchResults:
+        for item in search_results:
             if 'title' in locals() and 'author' in locals(): # Если тайтл и автор уже есть - выходим
                 break
             if item.title != '':
@@ -35,7 +34,7 @@ async def main_search(website: str, photo_url: str, attached_urls: list = []):
         if 'author' not in locals():
             author = 'Unknown'
 
-        return linksKeyboard, title, author
+        return links_keyboard, title, author
     else:
         return False, '404', '404'
     
@@ -49,28 +48,28 @@ async def saucenao_handler(photo_url: str):
             
             engine = SauceNAO(api_key=settings.tokens.sauce_token)
             response = await engine.search(file=photo_bytes)
-            apiResults = response.origin['results']
+            api_results = response.origin['results']
             
-            if float(apiResults[0]['header']['similarity']) < 65:
+            if float(api_results[0]['header']['similarity']) < 65:
                 return False
             
-            attachedUrls = []
+            attached_urls = []
             results = []
             
-            for item in apiResults:
+            for item in api_results:
                 header = item['header']
                 data = item['data']
                 if float(header['similarity']) >= 65:
                     # Основной источник
                     if data['source'] and urlValidator(data['source']):
-                        if data['source'] not in attachedUrls:
-                            attachedUrls.append(data['source'])
+                        if data['source'] not in attached_urls:
+                            attached_urls.append(data['source'])
                             results.append(PictureItem(data['material'], data['creator'], data['source']))
                     # Доп ссылки
                     if data['ext_urls']:
                         for url in data['ext_urls']:
-                            if url not in attachedUrls:
-                                attachedUrls.append(url)
+                            if url not in attached_urls:
+                                attached_urls.append(url)
                                 results.append(PictureItem(data['material'], data['creator'], url))
                                 
             return results
@@ -84,18 +83,18 @@ async def ascii2d_handler(photo_url: str):
         
         engine = Ascii2D(base_url='https://ascii2d.obfs.dev/')
         response = await engine.search(file=photo_bytes)
-        apiResults = response.raw
+        api_results = response.raw
     
-        attachedUrls = []
+        attached_urls = []
         results = []
         
-        for item in apiResults:
+        for item in api_results:
             if item.url and urlValidator(item.url):
-                if item.url not in attachedUrls:
+                if item.url not in attached_urls:
                     item_bytes = await fetch_img_bytes(item.thumbnail)
                     similarity = await get_similarity(photo_bytes, item_bytes)
                     if similarity >= 90:
-                        attachedUrls.append(item.url)
+                        attached_urls.append(item.url)
                         results.append(PictureItem(item.title, item.author, item.url))
 
         if not results:
