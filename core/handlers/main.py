@@ -25,8 +25,7 @@ async def get_photo(message: Message, bot: Bot):
                 action='additional_search',
                 file_path=file.file_path).pack()
         ))
-        await message.reply(answer, 
-            reply_markup=search_results_keyboard.as_markup(), 
+        await message.reply(answer,
             reply_markup=search_results_keyboard.as_markup(), 
             parse_mode=ParseMode.HTML,
             disable_web_page_preview = True)
@@ -43,13 +42,11 @@ async def ascii2d_search(callback: CallbackQuery, callback_data: SearchCallbackD
         disable_web_page_preview = True)
     
     search_results_keyboard, title, author = await main_search('ascii2d', callback_data.file_path)
-    search_results_keyboard, title, author = await main_search('ascii2d', callback_data.file_path)
 
     if search_results_keyboard:
         answer = TITLE + title + "\n" + AUTHOR + author + "\n"
         
         await callback.message.edit_text(answer,
-            reply_markup=search_results_keyboard.as_markup(), 
             reply_markup=search_results_keyboard.as_markup(), 
             parse_mode=ParseMode.HTML,
             disable_web_page_preview = True)
