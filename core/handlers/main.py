@@ -2,7 +2,7 @@ from aiogram import Bot, F, Router
 from aiogram.types import Message, CallbackQuery, InlineKeyboardButton
 from aiogram.enums import ParseMode
 from core.helpers import SearchCallbackData, ascii2d_keyboard
-from core.handlers.searches import main_search
+from core.searches import main_search
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 router = Router()
