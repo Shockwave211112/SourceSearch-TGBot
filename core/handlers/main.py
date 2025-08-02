@@ -25,6 +25,7 @@ async def get_photo(message: Message, bot: Bot):
                 action='additional_search',
                 file_path=file.file_path).pack()
         ))
+        
         await message.reply(answer,
             reply_markup=search_results_keyboard.as_markup(), 
             parse_mode=ParseMode.HTML,

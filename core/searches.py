@@ -59,18 +59,24 @@ async def saucenao_handler(photo_url: str):
             for item in api_results:
                 header = item['header']
                 data = item['data']
+                source = data.get('source')
+                ext_urls = data.get('ext_urls')
                 if float(header['similarity']) >= 65:
                     # Основной источник
-                    if data['source'] and urlValidator(data['source']):
-                        if data['source'] not in attached_urls:
-                            attached_urls.append(data['source'])
-                            results.append(PictureItem(data['material'], data['creator'], data['source']))
+                    if source and urlValidator(source):
+                        if source not in attached_urls:
+                            author = data.get('creator') or data.get('member_name') or 'Unknown'
+                            title = data.get('title') or data.get('material') or 'Unknown'
+                            attached_urls.append(source)
+                            results.append(PictureItem(title, author, source))
                     # Доп ссылки
-                    if data['ext_urls']:
-                        for url in data['ext_urls']:
+                    if ext_urls:
+                        for url in ext_urls:
                             if url not in attached_urls:
+                                author = data.get('creator') or data.get('member_name') or 'Unknown'
+                                title = data.get('title') or data.get('material') or 'Unknown'
                                 attached_urls.append(url)
-                                results.append(PictureItem(data['material'], data['creator'], url))
+                                results.append(PictureItem(title, author, url))
                                 
             return results
         except Exception as e:
