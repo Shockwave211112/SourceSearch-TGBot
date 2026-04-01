@@ -15,7 +15,7 @@ router = Router()
 async def get_start(message: Message, lang: str):
     await message.answer(get_text("MESSAGES", "WELCOME", lang))
 
-@router.message(F.photo, F.chat.type == "private")
+@router.message(F.photo, F.chat.type == "private", F.media_group_id == None)
 async def handle_search(
         message: Message,
         session: AsyncSession,
@@ -102,6 +102,10 @@ async def handle_action(
         await callback.answer(get_text("MESSAGES", "LIMITS_ERROR", lang), show_alert=True)
 
     await callback.answer()
+
+@router.message(F.photo, F.chat.type == "private", F.media_group_id != None)
+async def get_anything(message: Message, lang: str):
+    await message.answer(get_text("MESSAGES", "ALBUM_ERROR", lang))
 
 @router.message(F.chat.type == "private")
 async def get_anything(message: Message, lang: str):

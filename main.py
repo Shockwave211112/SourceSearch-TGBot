@@ -3,6 +3,8 @@ import logging
 from aiogram import Bot, Dispatcher
 from core.config import settings
 from database.config import async_session, init_db
+from database.middlewares.album import AlbumThrottleMiddleware
+from database.middlewares.throttle import ThrottlingMiddleware
 from handlers.main import router
 from database.middlewares.session import DbSessionMiddleware
 from database.middlewares.user import UserManagerMiddleware
@@ -27,10 +29,14 @@ async def main():
     bot = Bot(token=settings.BOT_TOKEN.get_secret_value())
     dp = Dispatcher()
 
+    dp.message.outer_middleware(AlbumThrottleMiddleware())
     dp.message.outer_middleware(DbSessionMiddleware(database_session=async_session))
     dp.message.outer_middleware(UserManagerMiddleware())
+    dp.message.outer_middleware(ThrottlingMiddleware())
+
     dp.callback_query.outer_middleware(DbSessionMiddleware(database_session=async_session))
     dp.callback_query.outer_middleware(UserManagerMiddleware())
+    dp.callback_query.outer_middleware(ThrottlingMiddleware())
     
     dp.include_router(router)
 
