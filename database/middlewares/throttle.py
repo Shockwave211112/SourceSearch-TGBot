@@ -7,6 +7,9 @@ from utils.answer_utils import get_text, ActionCallbackData
 
 
 class ThrottlingMiddleware(BaseMiddleware):
+    """
+    Мидлварь для предотвращения спама запросами юзера к API
+    """
     def __init__(self, slow_mode_delay: float = 5):
         self.delay = slow_mode_delay
 
@@ -35,7 +38,7 @@ class ThrottlingMiddleware(BaseMiddleware):
                 if event.photo:
                     builder = InlineKeyboardBuilder()
                     builder.button(
-                        text=get_text("BUTTONS", "SEARCH_AGAIN", lang),
+                        text=get_text("BUTTONS", "TRY_AGAIN", lang),
                         callback_data=ActionCallbackData(action="search_again", next_provider=None)
                     )
                     kb = builder.as_markup()

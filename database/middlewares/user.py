@@ -33,8 +33,7 @@ class UserManagerMiddleware(BaseMiddleware):
                 user.daily_limit=999
 
             database_session.add(user)
-            await database_session.commit()
-            await database_session.refresh(user)
+            await database_session.flush()
 
         data["user"] = user
         data["lang"] = user.language_code

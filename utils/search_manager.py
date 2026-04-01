@@ -46,7 +46,6 @@ class SearchManager:
         if cache:
             cache.searched_providers = []
             cache.results = {}
-            await self.database_session.commit()
 
     class InsufficientLimitsError(Exception):
         """Исключение: у пользователя закончились попытки поиска"""
@@ -117,7 +116,6 @@ class SearchManager:
 
             self.user.requests_today += 1
             self.user.last_request = datetime.now()
-            await self.database_session.commit()
 
         return cache.results, self._get_next_provider_name(cache.searched_providers)
 
@@ -131,4 +129,3 @@ class SearchManager:
             last_provider = new_providers.pop()
             del cache.results[last_provider]
             cache.searched_providers = new_providers
-            await self.database_session.commit()

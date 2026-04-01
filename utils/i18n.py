@@ -23,12 +23,14 @@ LOCALIZATION = {
         "ru": {
             "SEARCH_MORE": "🔍 Искать ещё",
             "RETRY_PROVIDER": "♻️ Повторить последний поиск",
-            "SEARCH_AGAIN": "🔄 Искать заново",
+            "SEARCH_AGAIN": "🔄 Искать везде заново",
+            "TRY_AGAIN": "🔍 Попробовать ещё раз",
         },
         "en": {
             "SEARCH_MORE_": "🔍 Search more",
             "RETRY_PROVIDER": "♻️ Retry last search",
-            "SEARCH_AGAIN": "🔄 Search again",
+            "SEARCH_AGAIN": "🔄 Search everywhere again",
+            "TRY_AGAIN": "🔍 Try again",
         },
     },
     "LETTERS": {

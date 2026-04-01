@@ -14,4 +14,10 @@ class DbSessionMiddleware(BaseMiddleware):
     ) -> Any:
         async with self.database_session() as database_session:
             data["session"] = database_session
-            return await handler(event, data)
+            try:
+                result = await handler(event, data)
+                await database_session.commit()
+                return result
+            except Exception:
+                await database_session.rollback()
+                raise
