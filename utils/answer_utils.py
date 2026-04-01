@@ -21,9 +21,6 @@ def get_text(category: str, key: str, lang: str = "en", **kwargs):
     return text.format(**kwargs)
 
 def format_search_response(results: dict, next_provider: str = None, lang: str = "en") -> tuple[Text, Optional[InlineKeyboardMarkup]]:
-    if not results:
-        return Text(get_text("MESSAGES", "NOT_FOUND", lang)), None
-
     unique_items = {}
     for sublist in results.values():
         for item_data in sublist:
@@ -34,6 +31,9 @@ def format_search_response(results: dict, next_provider: str = None, lang: str =
                 unique_items[key] = item
 
     all_items = sorted(unique_items.values(), key=lambda x: x.score, reverse=True)
+
+    if not all_items:
+        return Text(get_text("MESSAGES", "NOT_FOUND", lang)), None
 
     title = next((item.title for item in all_items if item.title), "Unknown")
     author = next((item.author for item in all_items if item.author), "Unknown")
