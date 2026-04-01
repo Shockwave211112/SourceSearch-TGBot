@@ -104,7 +104,7 @@ async def handle_action(
     await callback.answer()
 
 @router.message(F.photo, F.chat.type == "private", F.media_group_id != None)
-async def get_anything(message: Message, lang: str):
+async def get_album(message: Message, lang: str):
     await message.answer(get_text("MESSAGES", "ALBUM_ERROR", lang))
 
 @router.message(F.chat.type == "private")
