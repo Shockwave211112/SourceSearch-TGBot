@@ -5,7 +5,6 @@ from schemas.source_item import SourceItem
 from services.base_search import BaseSearchProvider
 from utils.helpers import check_useless_hostname
 
-
 class SauceNAOProvider(BaseSearchProvider):
     async def search(self, image_bytes: bytes) -> list[SourceItem]:
         async with Network(headers=self.headers) as client:

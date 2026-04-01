@@ -24,12 +24,16 @@ def format_search_response(results: dict, next_provider: str = None, lang: str =
     if not results:
         return Text(get_text("MESSAGES", "NOT_FOUND", lang)), None
 
-    all_items = [
-        SourceItem(**item)
-        for sublist in results.values()
-        for item in sublist
-    ]
-    all_items.sort(key=lambda x: x.score, reverse=True)
+    unique_items = {}
+    for sublist in results.values():
+        for item_data in sublist:
+            item = SourceItem(**item_data)
+
+            key = item.url
+            if key not in unique_items:
+                unique_items[key] = item
+
+    all_items = sorted(unique_items.values(), key=lambda x: x.score, reverse=True)
 
     title = next((item.title for item in all_items if item.title), "Unknown")
     author = next((item.author for item in all_items if item.author), "Unknown")

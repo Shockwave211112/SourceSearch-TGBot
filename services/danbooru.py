@@ -40,7 +40,7 @@ class DanbooruProvider(BaseSearchProvider):
 
             source_list.append(SourceItem(
                 website=settings.DANBOORU_DOMAIN,
-                url=f"https://{settings.DANBOORU_DOMAIN}/posts/{post.get('id')}",
+                url=f"https://{settings.DANBOORU_DOMAIN}/post/show/{post.get('id')}",
                 title=f"{post.get('tag_string_copyright', '')} {post.get('tag_string_character', '')}".strip(),
                 author=post.get("tag_string_artist"),
                 score=round(item.get("score"), 2),
