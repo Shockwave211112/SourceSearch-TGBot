@@ -2,9 +2,9 @@ sqlalchemy==2.0.48
 alembic==1.18.4
 pydantic-settings==2.13.1
 PicImageSearch==3.12.11
-imagehash
-aiogram
-pillow
+imagehash==4.3.2
+aiogram==3.26.0
+pillow==12.1.1
 logging
-aiosqlite
+aiosqlite==0.22.1
 pydantic
