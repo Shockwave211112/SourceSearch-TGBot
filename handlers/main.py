@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from database.models.user import User
 from io import BytesIO
 from utils.answer_utils import *
+from utils.helpers import SmartResponse
 from utils.search_manager import InsufficientLimitsError, SearchManager
 
 logger = logging.getLogger(__name__)
@@ -25,11 +26,18 @@ async def handle_search(
 ):
     file = message.photo[-1]
     manager = SearchManager(session, user)
+    response = SmartResponse(message)
 
     results, next_provider = await manager.get_results_or_none(file.file_unique_id)
 
     if results is None:
         try:
+            await response.send(
+                get_text("MESSAGES", "PLS_WAIT", lang),
+                reply_markup=None,
+                parse_mode="HTML"
+            )
+
             buffer = BytesIO()
             await bot.download(file, destination=buffer)
 
@@ -38,11 +46,13 @@ async def handle_search(
                 image_bytes=buffer.getvalue()
             )
         except InsufficientLimitsError:
-            return await message.reply(get_text("MESSAGES", "LIMITS_ERROR", lang), show_alert=True)
+            return await response.send(get_text("MESSAGES", "LIMITS_ERROR", lang), show_alert=True)
+        except Exception as e:
+            logger.error(f"Ошибка при поиске - {e}")
 
     text, reply_markup = format_search_response(results, next_provider, lang)
-    
-    await message.reply(
+
+    await response.send(
         **text.as_kwargs(),
         reply_markup=reply_markup,
         disable_web_page_preview=True
@@ -63,6 +73,7 @@ async def handle_action(
     manager = SearchManager(session, user)
     file = callback.message.reply_to_message.photo[-1]
     file_unique_id = file.file_unique_id
+    response = SmartResponse(callback)
 
     is_force = False
     if callback_data.action == "search_again":
@@ -74,15 +85,12 @@ async def handle_action(
         is_force = True
 
     try:
-        await callback.message.edit_text(
+        await response.send(
             get_text("MESSAGES", "PLS_WAIT", lang),
             reply_markup=None,
             parse_mode="HTML"
         )
-    except Exception as e:
-        logger.error(f"Ошибка при повторном поиске - {e}")
 
-    try:
         buffer = BytesIO()
         await bot.download(file, destination=buffer)
 
@@ -93,15 +101,14 @@ async def handle_action(
         )
 
         text, reply_markup = format_search_response(results, next_provider, lang)
-        await callback.message.edit_text(
+        await response.send(
             **text.as_kwargs(),
             reply_markup=reply_markup
         )
-
     except InsufficientLimitsError:
-        await callback.answer(get_text("MESSAGES", "LIMITS_ERROR", lang), show_alert=True)
-
-    await callback.answer()
+        await response.send(get_text("MESSAGES", "LIMITS_ERROR", lang), show_alert=True)
+    except Exception as e:
+        logger.error(f"Ошибка при экшене {callback_data.action} - {e}")
 
 @router.message(F.photo, F.chat.type == "private", F.media_group_id != None)
 async def get_album(message: Message, lang: str):

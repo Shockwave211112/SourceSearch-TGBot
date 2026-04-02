@@ -21,6 +21,8 @@ def get_text(category: str, key: str, lang: str = "en", **kwargs):
     return text.format(**kwargs)
 
 def format_search_response(results: dict, next_provider: str = None, lang: str = "en") -> tuple[Text, Optional[InlineKeyboardMarkup]]:
+    builder = InlineKeyboardBuilder()
+
     unique_items = {}
     for sublist in results.values():
         for item_data in sublist:
@@ -33,43 +35,42 @@ def format_search_response(results: dict, next_provider: str = None, lang: str =
     all_items = sorted(unique_items.values(), key=lambda x: x.score, reverse=True)
 
     if not all_items:
-        return Text(get_text("MESSAGES", "NOT_FOUND", lang)), None
+        content = Text(get_text("MESSAGES", "NOT_FOUND", lang))
+    else:
+        title = next((item.title for item in all_items if item.title), "Unknown")
+        author = next((item.author for item in all_items if item.author), "Unknown")
 
-    title = next((item.title for item in all_items if item.title), "Unknown")
-    author = next((item.author for item in all_items if item.author), "Unknown")
-    
-    content = Text(
-        Bold(get_text("LETTERS", "TITLE", lang)), title, "\n",
-        Bold(get_text("LETTERS", "AUTHOR", lang)), author
-    )
-    
-    builder = InlineKeyboardBuilder()
-    seen_urls = set()
+        content = Text(
+            Bold(get_text("LETTERS", "TITLE", lang)), title, "\n",
+            Bold(get_text("LETTERS", "AUTHOR", lang)), author
+        )
 
-    for item in all_items:
-        if item.url in seen_urls:
-            continue
-        
-        builder.button(text=item.website, url=item.url)
-        seen_urls.add(item.url)
+        seen_urls = set()
+        for item in all_items:
+            if item.url in seen_urls:
+                continue
 
-    builder.adjust(2)
+            builder.button(text=item.website, url=item.url)
+            seen_urls.add(item.url)
 
-    if next_provider:
+        builder.adjust(2)
+
+        if next_provider:
+            builder.row(InlineKeyboardButton(
+                text=get_text("BUTTONS", "SEARCH_MORE", lang),
+                callback_data=ActionCallbackData(
+                    action="next",
+                    next_provider=next_provider
+                ).pack()
+            ))
         builder.row(InlineKeyboardButton(
-            text=get_text("BUTTONS", "SEARCH_MORE", lang),
+            text=get_text("BUTTONS", "RETRY_PROVIDER", lang),
             callback_data=ActionCallbackData(
-                action="next",
-                next_provider=next_provider
+                action="retry_provider",
+                next_provider=None
             ).pack()
         ))
-    builder.row(InlineKeyboardButton(
-        text=get_text("BUTTONS", "RETRY_PROVIDER", lang),
-        callback_data=ActionCallbackData(
-            action="retry_provider",
-            next_provider=None
-        ).pack()
-    ))
+
     builder.row(InlineKeyboardButton(
         text=get_text("BUTTONS", "SEARCH_AGAIN", lang),
         callback_data=ActionCallbackData(

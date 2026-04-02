@@ -3,11 +3,11 @@ import logging
 from aiogram import Bot, Dispatcher
 from core.config import settings
 from database.config import async_session, init_db
-from database.middlewares.album import AlbumThrottleMiddleware
-from database.middlewares.throttle import ThrottlingMiddleware
+from middlewares.album import AlbumThrottleMiddleware
+from middlewares.throttle import ThrottlingMiddleware
 from handlers.main import router
-from database.middlewares.session import DbSessionMiddleware
-from database.middlewares.user import UserManagerMiddleware
+from middlewares.session import DbSessionMiddleware
+from middlewares.user import UserManagerMiddleware
 from utils.logging_utils import SensitiveDataFilter
 
 def setup_logging():
