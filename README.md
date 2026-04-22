@@ -4,7 +4,7 @@
 [![Aiogram](https://img.shields.io/badge/Aiogram-3.26-blue.svg)](https://docs.aiogram.dev/)
 [![Docker](https://img.shields.io/badge/Docker-Supported-blue.svg)](https://www.docker.com/)
 
-Бот для поиска первоисточников изображений (digital-арты). Отправьте картинку — получите ссылки на сайты, где она была опубликована.
+[Бот](https://t.me/SWPicFinderBot) для поиска первоисточников изображений (digital-арты). Отправьте картинку — получите ссылки на сайты, где она была опубликована.
 
 ## 📌 О проекте
 
