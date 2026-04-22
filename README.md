@@ -76,7 +76,7 @@
 | OWNER_ID | Ваш Telegram ID (безлимит запросов) | Узнать у каких-либо ботов (к примеру, [userinfobot](https://t.me/userinfobot)) |
 
 ## 🛠️ Использовано
-> Aiogram 3
-> SQLAlchemy + Alembic 
-> PicImageSearch
-> Pillow
+* Aiogram 3
+* SQLAlchemy + Alembic 
+* PicImageSearch
+* Pillow
